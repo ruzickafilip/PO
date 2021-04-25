@@ -1,0 +1,6 @@
+- jedná se o webovou aplikaci
+- pro buildění pužit WAMP.NET
+- PHP8
+- JavaScript (JQuery)
+- Bootstrap
+- MYSQL + Doctrine
