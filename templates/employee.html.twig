@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+        {% include "header.html.twig" %}
+    </head>
+
+    <body>
+        {% include "navbar.html.twig" %}
+        {% include "Login.html.twig" %}
+        {% include "Signup.html.twig" %} 
+        {% include "createEmployee.html.twig" %} 
+
+        <div class="container">
+        <br>
+        <h2>Zaměstnanci</h2>
+        <a class="btn btn-dark pull-right" href="javascript:void(0);" data-toggle="modal" id="btn-createEmployee" data-target="#createEmployee">
+        <i class="fas fa-plus-circle"></i> Vytvořit zaměstnance</a>
+        <br>
+
+            {# {% for group in allEmployees %}
+
+                {% if not group.getid == null %}
+
+                    <div class="card text-center">
+                    <div class="card-header group-header">{{ group.getShortcut }}</div>
+                    <div class="card-body">
+
+                    <div id="{{ 'groupRow' ~ group.getId }}" class="row">
+                        {% for subject in subjects[group.getid] %}
+                            {% for sbj in subject %}
+                                {% if not sbj == null %}
+                                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <strong>{{ sbj.getShortcut }}</strong>
+                                    <button type="button" class="close subject-label" data-dismiss="alert" data-idSubject="{{ sbj.getId }}" data-idEmployee="{{ group.getid }}" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+
+                                    <div style="width:10px;"></div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+
+
+                    </div>
+                    <div class="card-footer text-muted">
+                    </div>
+                    </div>
+
+
+                {% endif %}
+
+                <br>
+
+            {% endfor %} #}
+            
+        </div>
+
+
+        {% include "Footer.html.twig" %}
+    </body>
+</html>
+

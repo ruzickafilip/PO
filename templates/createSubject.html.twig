@@ -1,0 +1,53 @@
+<div id="createSubject" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Vytvoření předmětu</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+      <div class="alert alert-dark" id="createSubject-alert" role="alert" style="display: none;">
+      </div>
+      <div class="form-group">
+          <label for="email">Zkratka:</label>
+          <input type="email" class="form-control" id="subject-shortcut-input">
+      </div>
+      <div class="form-group">
+          <label>Počet týdnů:</label>
+          <input type="input" class="form-control" value="14" id="subject-weekCount-input">
+      </div>
+        <div class="form-group">
+          <label>Počet přednášek za týden:</label>
+          <input type="input" class="form-control" value="1" id="subject-lectureCount-input">
+      </div>
+         <div class="form-group">
+          <label>Počet cvičení za týden:</label>
+          <input type="input" class="form-control" value="3" id="subject-exerciseCount-input">
+      </div>
+        <div class="form-group">
+          <label>Počet seminářů za týden:</label>
+          <input type="input" class="form-control" value="2" id="subject-seminarCount-input">
+      </div>
+      <div class="form-group">
+          <label for="role">Zakončení:</label>
+          <select class="form-control" id="subject-endType-input">
+            <option id="z" selected>z</option>
+            <option id="zk" selected>zk</option>
+          </select>
+      </div>
+       <div class="form-group">
+          <label for="role">Jazyk:</label>
+          <select class="form-control" id="subject-language-input">
+            <option id="cz" selected>cz</option>
+          </select>
+      </div>
+        <div class="form-group">
+          <label>Velikost třídy:</label>
+          <input type="input" class="form-control" value="24" id="subject-classCount-input">
+      </div>
+      <button type="submit" id="btn-createSubject" class="btn btn-dark pull-right">Vytvořit</button>
+      <button type="button" class="btn btn-dark pull-right" data-dismiss="modal">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>

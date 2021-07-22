@@ -57,6 +57,77 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 
 });
 
+$app->get('/subject', function (Request $request, Response $response, array $args) {
+
+    if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
+        $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
+    } else {
+        $user = array('isLogged' => 'false');
+    } 
+
+    return $this->view->render($response, 'Subject.html.twig', ['user' => $user]); 
+
+});
+
+$app->get('/group', function (Request $request, Response $response, array $args) {
+
+    $allGroups = \Entity\Group::getAllGroups($this->dbal);
+
+    if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
+        $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
+    } else {
+        $user = array('isLogged' => 'false');
+    } 
+
+    $subjects = array();
+    $unassignedSubjects = array();
+    foreach($allGroups as $key => $group) {
+        if (!is_null($group)) {
+            $subjects[$group->getId()][] = \Entity\Subject::getAllSubjectsByGroupId($this->dbal, $group->getId());
+            $unassignedSubjects[$group->getId()][] = \Entity\Subject::getUnassignedSubjects($this->dbal, $group->getId());
+        }
+    }
+
+    // var_dump($unassignedSubjects[1]);exit;
+    // var_dump($subjects);exit;
+    return $this->view->render($response, 'group.html.twig', ['user' => $user, 'allGroups' => $allGroups, 'subjects' => $subjects, 'unassignedSubjects' => $unassignedSubjects]); 
+
+});
+
+$app->get('/employees', function (Request $request, Response $response, array $args) {
+
+    if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
+        $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
+    } else {
+        $user = array('isLogged' => 'false');
+    } 
+
+    return $this->view->render($response, 'employee.html.twig', ['user' => $user]); 
+
+});
+
+
+$app->get('/generate-tags', function (Request $request, Response $response, array $args) {
+
+    if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
+        $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
+    } else {
+        $user = array('isLogged' => 'false');
+    } 
+
+    $groups = \Entity\Group::getAllGroups($this->dbal);
+
+    foreach($groups as $group) {
+        if (!is_null($group)) {
+            $subjects = \Entity\Subject::getAllSubjectsByGroupId($this->dbal, $group->getId());
+            \Entity\Tag::generateTags($this->dbal, $group, $subjects);
+        }
+    }
+    
+    return $this->view->render($response, 'Main.html.twig', ['user' => $user]); 
+
+});
+
 // ----- AJAX -----
 
 $app->post('/signup', function ($request, $response, $args) {
@@ -120,6 +191,76 @@ $app->post('/logout', function ($request, $response, $args) {
     ));
 
 });
+
+$app->post('/create-subject', function ($request, $response, $args) {
+    
+    echo json_encode(array(
+        'result' => \Entity\Subject::createSubject($this->dbal, $_POST['shortcut'], $_POST['weekCount'], $_POST['lectureCount'], $_POST['exerciseCount'], $_POST['seminarCount'], $_POST['endType'], $_POST['language'], $_POST['classCount'])
+    ));
+
+});
+
+$app->post('/create-group', function ($request, $response, $args) {
+
+    echo json_encode(array(
+        'result' => \Entity\Group::createGroup($this->dbal, $_POST['shortcut'], $_POST['grade'], $_POST['semester'], $_POST['studentCount'], $_POST['studyForm'], $_POST['studyType'], $_POST['language'])
+    ));
+
+});
+
+$app->post('/create-employee', function ($request, $response, $args) {
+
+    echo json_encode(array(
+        'result' => \Entity\Employee::createEmployee($this->dbal, $_POST['surname'], $_POST['lastname'], $_POST['privatemail'], $_POST['publicmail'], $_POST['worktype'], $_POST['doctor'])
+    ));
+
+});
+
+$app->post('/delete-subject-group-relation', function ($request, $response, $args) {
+    
+    \Entity\SubjectGroupRel::deleteSubjectGroupRelation($this->dbal, $_POST['idGroup'], $_POST['idSubject']);
+
+    $unassignedSubjects = \Entity\Subject::getUnassignedSubjects($this->dbal, $_POST['idGroup']);
+    $result = null;
+    if (!is_null($unassignedSubjects)) {
+        foreach($unassignedSubjects as $unassignedSubject) {
+            $result[] = array('subjectName' => $unassignedSubject->getShortcut(), 'idSubject' => $unassignedSubject->getId());
+        }
+    }
+
+    echo json_encode(array(
+        'result' => array(
+            'unassignedSubjects' => $result
+        )
+    ));
+
+});
+
+$app->post('/add-subject-group-relation', function ($request, $response, $args) {
+
+    \Entity\SubjectGroupRel::createSubjectGroupRel($this->dbal, $_POST['idSubject'], $_POST['idGroup']);
+
+    $subject = \Entity\Subject::getSubjectById($this->dbal, $_POST['idSubject']);
+    $unassignedSubjects = \Entity\Subject::getUnassignedSubjects($this->dbal, $_POST['idGroup']);
+    $result = null;
+    if (!is_null($unassignedSubjects)) {
+        foreach($unassignedSubjects as $unassignedSubject) {
+            $result[] = array('subjectName' => $unassignedSubject->getShortcut(), 'idSubject' => $unassignedSubject->getId());
+        }
+    }
+
+    echo json_encode(array(
+        'result' => array(
+            'subjectName' => $subject->getShortcut(),
+            'unassignedSubjects' => $result
+        )
+    ));
+
+});
+
+
+
+
 
 $app->run();
 ?>

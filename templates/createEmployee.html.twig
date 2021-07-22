@@ -1,0 +1,43 @@
+<div id="createEmployee" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Vytvoření zaměstnance</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+      <div class="alert alert-dark" id="createEmployee-alert" role="alert" style="display: none;">
+      </div>
+      <div class="form-group">
+          <label for="email">Jméno:</label>
+          <input type="email" class="form-control" id="employee-surname-input">
+      </div>
+      <div class="form-group">
+          <label>Příjmení:</label>
+          <input type="input" class="form-control" id="employee-lastname-input">
+      </div>
+        <div class="form-group">
+          <label>Soukromý email:</label>
+          <input type="input" class="form-control" id="employee-privatemail-input">
+      </div>
+         <div class="form-group">
+          <label>Veřejný email:</label>
+          <input type="input" class="form-control" id="employee-publicmail-input">
+      </div>
+        <div class="form-group">
+          <label>Typ úvazku:</label>
+          <input type="input" class="form-control" value="1" id="employee-worktype-input">
+      </div>
+      <div class="form-group">
+          <label for="role">Doktorand:</label>
+          <select class="form-control" id="employee-doctor-input">
+            <option id="yes" selected>Ano</option>
+            <option id="no" selected>Ne</option>
+          </select>
+      </div>
+      <button type="submit" id="btn-createEmployee" class="btn btn-dark pull-right">Vytvořit</button>
+      <button type="button" class="btn btn-dark pull-right" data-dismiss="modal">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>
