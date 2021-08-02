@@ -33,7 +33,7 @@ class Employee {
 
     private function loadData() {
         $qb = $this->dbal->createQueryBuilder();
-        $qb->select("id, surname, lastname, privateEmail, publicEmail, workType, doctor");
+        $qb->select("id, surname, lastname, privateEmail, publicEmail, workType, doctor, points");
         $qb->from("employee", "e");
         $qb->where("id = :id")->setParameter("id", $this->id);
 
@@ -74,7 +74,7 @@ class Employee {
     public static function getAllEmployees($dbal) {
 
         $qb = $dbal->createQueryBuilder();
-        $qb->select("id, surname, lastname, privateEmail, publicEmail, workType, doctor");
+        $qb->select("id, surname, lastname, privateEmail, publicEmail, workType, doctor, points");
         $qb->from("employee", "e");
         
         $result = $qb->execute()->fetchAll();
@@ -85,6 +85,64 @@ class Employee {
         }
 
         return $groups;
+
+    }
+
+    public static function addPointsToEmployee($dbal, $idEmployee, $points) {
+
+        $employee = Employee::load($dbal, $idEmployee);
+        if (!is_null($employee)) {
+            $currentPoints = $employee->getPoints();
+            $points += $currentPoints;
+
+            $qb = $dbal->createQueryBuilder();
+            $qb->update('employee', 'e');
+            $qb->set('e.points', ':points');
+            $qb->where('e.id = :idEmployee');
+            $qb->setParameter('points', $points);
+            $qb->setParameter('idEmployee', $idEmployee);
+            $qb->execute();
+            
+            $employee = Employee::load($dbal, $idEmployee);
+        }
+
+        return $employee;
+
+    }
+
+    public static function substractPointsFromEmployee($dbal, $idEmployee, $points) {
+
+        $employee = Employee::load($dbal, $idEmployee);
+        if (!is_null($employee)) {
+            $currentPoints = $employee->getPoints();
+            $currentPoints -= $points ;
+            if ($currentPoints < 0) {
+                $currentPoints = 0;
+            }
+
+            $qb = $dbal->createQueryBuilder();
+            $qb->update('employee', 'e');
+            $qb->set('e.points', ':points');
+            $qb->where('e.id = :idEmployee');
+            $qb->setParameter('points', $currentPoints);
+            $qb->setParameter('idEmployee', $idEmployee);
+            $qb->execute();
+            
+            $employee = Employee::load($dbal, $idEmployee);
+        }
+
+        return $employee;
+
+    }
+
+    public static function getEmployeePoints($dbal, $idEmployee) {
+
+        $qb = $dbal->createQueryBuilder();
+        $qb->select("points");
+        $qb->from("employee", "e");
+        $qb->where("e.id = :employeeId")->setParameter("employeeId", $idEmployee);
+        $employee = $qb->execute()->fetch();
+        return $employee['points'];
 
     }
 
@@ -114,6 +172,10 @@ class Employee {
 
     public function getDoctor() {
         return $this->data['doctor'];
+    }
+
+    public function getPoints() {
+        return $this->data['points'];
     }
 
 }

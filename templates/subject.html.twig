@@ -17,17 +17,32 @@
         <i class="fas fa-plus-circle"></i> Vytvořit předmět</a>
         <br>
         <br>
-            
-            <div class="card text-center">
-            <div class="card-header">
-            </div>
-            <div class="card-body">
-                
-            </div>
-            <div class="card-footer text-muted">
-            </div>
-            </div>
-        
+    
+        {% for subject in allSubjects %}
+            {% if not subject.getid == null %}
+
+                <div class="card text-center">
+                    <div class="card-header group-header">{{ subject.getShortcut }}</div>
+                    <div class="card-body main-text">
+                        <div class="left-panel">
+                            <div>Počet přednášek: {{ subject.getLectureCount }}</div>
+                            <div>Počet cvičení: {{ subject.getLectureCount }}</div>
+                        </div>
+
+                        <div class="right-panel">
+                            <div>Počet seminářů: {{ subject.getSeminarCount }}</div>
+                            <div>Kapacita: {{ subject.getClassCount }} studentů</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-muted"></div>
+                </div>
+
+            {% endif %}
+
+            <br>
+        {% endfor %}
+
         </div>
 
 

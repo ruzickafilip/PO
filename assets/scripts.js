@@ -22,6 +22,10 @@ $("#btn-createEmployee").click(function(){
     createEmployee();
 });
 
+$("#btn-createTag").click(function(){
+    createTag();
+});
+
 $(document).on("click",".subject-label",function() {
     deleteSubjectGroupRelation($(this).attr("data-idGroup"), $(this).attr("data-idSubject"), "subject-box" + ($(this).attr("data-idGroup")));
 });
@@ -33,7 +37,17 @@ $('.assign-subjects-box').change(function(){
     addSubjectGroupRelation(idGroup, idSubject, idElement)
 });
 
+$('.assign-tags-box').change(function(){ 
+    var idUnassignedTag = $(this).val();
+    var idEmployee = $(this).attr("data-idEmployee");
+    var points = $(this).children(":selected").attr("data-tagPoints");
+    var idElement = $(this).attr("id");
+    addEmployeeToTag(idUnassignedTag, idEmployee, idElement, points);
+});
 
+$(document).on("click",".employee-label",function() {
+    deleteEmployeeFromTag($(this).attr("data-idEmployee"), $(this).attr("data-idTag"), "employee-box" + ($(this).attr("data-idEmployee")), $(this).attr("data-points"));
+});
 
 
 function SignUp() {
@@ -144,6 +158,44 @@ function createSubject() {
     
 }
 
+function createTag() {
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",                                                                                                                  
+        data: { 
+        "name" : $("#tag-name-input").val(), 
+        "studentCount" : $("#tag-studentCount-input").val(), 
+        "lessonCount" : $("#tag-lessonCount-input").val(), 
+        "weekCount" : $("#tag-weekCount-input").val(), 
+        "group" : $('#tag-group-input').children(":selected").attr("id"),
+        "type" : $('#tag-type-input').children(":selected").attr("id"),
+        "language" : 'cz',
+        "source" : 'special'
+        },
+        url: "http://po.utb/create-tag",
+        success: function(data){
+            if (data.result == 0) {
+                $("#createTag-alert").attr("style", "display: inline-block");
+                $("#createTag-alert").removeClass();
+                $("#createTag-alert").addClass("alert");
+                $("#createTag-alert").addClass("alert-danger");
+                $("#createTag-alert").text("Předmět se nepodařilo vytvořit.");
+                $("#createTag-alert").attr("style", "width:100%");
+            }
+            if (data.result == 1) {
+                $("#createTag-alert").attr("style", "display: inline-block");
+                $("#createTag-alert").removeClass();
+                $("#createTag-alert").addClass("alert");
+                $("#createTag-alert").addClass("alert-success");
+                $("#createTag-alert").text("Štítek vytvořen.");
+                $("#createTag-alert").attr("style", "width:100%");
+            }
+        }
+    });
+    
+}
+
 function createGroup() {
 
     $.ajax({
@@ -173,7 +225,7 @@ function createGroup() {
                 $("#createGroup-alert").removeClass();
                 $("#createGroup-alert").addClass("alert");
                 $("#createGroup-alert").addClass("alert-success");
-                $("#createGroup-alert").text("Skupina " + $("#group-shortcut-input").val()+ " vytvořen.");
+                $("#createGroup-alert").text("Skupina " + $("#group-shortcut-input").val()+ " vytvořena.");
                 $("#createGroup-alert").attr("style", "width:100%");
             }
         }
@@ -204,20 +256,20 @@ function createEmployee() {
         url: "http://po.utb/create-employee",
         success: function(data){
             if (data.result == 0) {
-                $("#createGroup-alert").attr("style", "display: inline-block");
-                $("#createGroup-alert").removeClass();
-                $("#createGroup-alert").addClass("alert");
-                $("#createGroup-alert").addClass("alert-danger");
-                $("#createGroup-alert").text("Zamestnance se nepodařilo vytvořit.");
-                $("#createGroup-alert").attr("style", "width:100%");
+                $("#createEmployee-alert").attr("style", "display: inline-block");
+                $("#createEmployee-alert").removeClass();
+                $("#createEmployee-alert").addClass("alert");
+                $("#createEmployee-alert").addClass("alert-danger");
+                $("#createEmployee-alert").text("Zamestnance se nepodařilo vytvořit.");
+                $("#createEmployee-alert").attr("style", "width:100%");
             }
             if (data.result == 1) {
-                $("#createGroup-alert").attr("style", "display: inline-block");
-                $("#createGroup-alert").removeClass();
-                $("#createGroup-alert").addClass("alert");
-                $("#createGroup-alert").addClass("alert-success");
-                $("#createGroup-alert").text("Zaměstnanec " + $("#group-shortcut-input").val()+ " vytvořen.");
-                $("#createGroup-alert").attr("style", "width:100%");
+                $("#createEmployee-alert").attr("style", "display: inline-block");
+                $("#createEmployee-alert").removeClass();
+                $("#createEmployee-alert").addClass("alert");
+                $("#createEmployee-alert").addClass("alert-success");
+                $("#createEmployee-alert").text("Zaměstnanec vytvořen.");
+                $("#createEmployee-alert").attr("style", "width:100%");
             }
         }
     });
@@ -251,6 +303,39 @@ function deleteSubjectGroupRelation(idGroup, idSubject, idElement) {
     
 }
 
+function deleteEmployeeFromTag(idEmployee, idTag, idElement, points) {
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",                                                                                                                  
+        data: { 
+        "idEmployee" : idEmployee, 
+        "idTag" : idTag,
+        "points": points
+        },
+        url: "http://po.utb/delete-employee-from-tag",
+        success: function(data){
+           
+            $("#employeeHeader" + idEmployee).text(data.result.newPoints + ' bodů');
+
+            $("#" + idElement).empty(); 
+            
+            var div2 = $("<option selected>  -  </option>");
+            $("#" + idElement).prepend($(div2));
+
+            data.result.unassignedTags.forEach(function(item) {
+            var html = '<option value="' +  item.idTag  + '" data-tagPoints="' +  item.tagPoints + '" >' +  item.tagName + '</option>'
+            $("#" + idElement).append(html);
+            });
+
+        }
+    });
+    
+}
+
+
+
+
 function addSubjectGroupRelation(idGroup, idSubject, idElement) {
 
     $.ajax({
@@ -280,4 +365,39 @@ function addSubjectGroupRelation(idGroup, idSubject, idElement) {
     });
     
 }
+
+
+function addEmployeeToTag(idUnassignedTag, idEmployee, idElement, points) {
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",                                                                                                                  
+        data: { 
+        "idUnassignedTag" : idUnassignedTag, 
+        "idEmployee" : idEmployee,
+        "points" : points
+        },
+        url: "http://po.utb/add-employee-to-tag",
+        success: function(data){
+
+            $("#employeeHeader" + idEmployee).text(data.result.newPoints + ' bodů');
+
+            var div=$("<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>" + data.result.tagName + '  |  ' + data.result.tagType + '  |  ' + data.result.tagPoints + "</strong><button type='button' class='close employee-label' data-dismiss='alert' data-idEmployee='" + idEmployee + "' data-idTag='" + data.result.idTag + "' data-points='" + data.result.tagPoints + "' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div><div style='width:10px;'></div>");
+            $("#employeeRow" + idEmployee).prepend(div);
+
+            $("#" + idElement).empty(); 
+            data.result.unassignedTags.forEach(function(item) {
+            var html = '<option value="' +  item.idTag  + '" data-tagPoints="' +  item.tagPoints + '" >' +  item.tagName + '</option>'
+            $("#" + idElement).append(html);
+            });
+
+            var div2 = $("<option selected> - </option>");
+            $("#" + idElement).prepend($(div2));
+
+        }
+    });
+    
+}
+
+
 

@@ -59,19 +59,18 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 
 $app->get('/subject', function (Request $request, Response $response, array $args) {
 
+    $allSubjects = \Entity\Subject::getAllSubjects($this->dbal);
     if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
         $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
     } else {
         $user = array('isLogged' => 'false');
     } 
 
-    return $this->view->render($response, 'Subject.html.twig', ['user' => $user]); 
+    return $this->view->render($response, 'Subject.html.twig', ['user' => $user, 'allSubjects' => $allSubjects]); 
 
 });
 
 $app->get('/group', function (Request $request, Response $response, array $args) {
-
-    $allGroups = \Entity\Group::getAllGroups($this->dbal);
 
     if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
         $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
@@ -81,6 +80,7 @@ $app->get('/group', function (Request $request, Response $response, array $args)
 
     $subjects = array();
     $unassignedSubjects = array();
+    $allGroups = \Entity\Group::getAllGroups($this->dbal);
     foreach($allGroups as $key => $group) {
         if (!is_null($group)) {
             $subjects[$group->getId()][] = \Entity\Subject::getAllSubjectsByGroupId($this->dbal, $group->getId());
@@ -88,8 +88,6 @@ $app->get('/group', function (Request $request, Response $response, array $args)
         }
     }
 
-    // var_dump($unassignedSubjects[1]);exit;
-    // var_dump($subjects);exit;
     return $this->view->render($response, 'group.html.twig', ['user' => $user, 'allGroups' => $allGroups, 'subjects' => $subjects, 'unassignedSubjects' => $unassignedSubjects]); 
 
 });
@@ -102,7 +100,32 @@ $app->get('/employees', function (Request $request, Response $response, array $a
         $user = array('isLogged' => 'false');
     } 
 
-    return $this->view->render($response, 'employee.html.twig', ['user' => $user]); 
+    $allEmployees = \Entity\Employee::getAllEmployees($this->dbal);
+    $tags = array();
+    $unassignedTags = array();
+    foreach($allEmployees as $key => $employee) {
+        if (!is_null($employee)) {
+            $tags[$employee->getId()] = \Entity\Tag::getAllTagsForEmployee($this->dbal, $employee->getId());
+            $unassignedTags[$employee->getId()] = \Entity\Tag::getAllUnassignedTagsForEmployee($this->dbal, $employee->getId());
+        }
+    }
+
+    return $this->view->render($response, 'employee.html.twig', ['user' => $user, 'allEmployees' => $allEmployees, 'tags' => $tags, 'unassignedTags' => $unassignedTags]); 
+
+});
+
+$app->get('/tags', function (Request $request, Response $response, array $args) {
+
+    if (isset($_SESSION['login']) && !empty($_SESSION['login'])) {
+        $user = array('isLogged' => 'true', 'login' => $_SESSION['login'], 'role' => $_SESSION['role']);
+    } else {
+        $user = array('isLogged' => 'false');
+    } 
+
+
+    $allTags = \Entity\Tag::getAllTags($this->dbal);
+    $allGroups = \Entity\Group::getAllGroups($this->dbal);
+    return $this->view->render($response, 'tag.html.twig', ['user' => $user, 'allTags' => $allTags, 'allGroups' => $allGroups]); 
 
 });
 
@@ -216,6 +239,14 @@ $app->post('/create-employee', function ($request, $response, $args) {
 
 });
 
+$app->post('/create-tag', function ($request, $response, $args) {
+    
+    echo json_encode(array(
+        'result' => \Entity\Tag::createTag($this->dbal, $_POST['name'], $_POST['type'], $_POST['studentCount'], $_POST['lessonCount'], $_POST['weekCount'], 0, $_POST['language'], $_POST['group'], null, null, $_POST['source'])
+    ));
+
+});
+
 $app->post('/delete-subject-group-relation', function ($request, $response, $args) {
     
     \Entity\SubjectGroupRel::deleteSubjectGroupRelation($this->dbal, $_POST['idGroup'], $_POST['idSubject']);
@@ -253,6 +284,62 @@ $app->post('/add-subject-group-relation', function ($request, $response, $args) 
         'result' => array(
             'subjectName' => $subject->getShortcut(),
             'unassignedSubjects' => $result
+        )
+    ));
+
+});
+
+$app->post('/add-employee-to-tag', function ($request, $response, $args) {
+
+    \Entity\Tag::updateTag($this->dbal, $_POST['idEmployee'], $_POST['idUnassignedTag']);
+    \Entity\Employee::addPointsToEmployee($this->dbal, $_POST['idEmployee'], $_POST['points']);
+    $newPoints  = \Entity\Employee::getEmployeePoints($this->dbal, $_POST['idEmployee']);
+
+    $tag = \Entity\Tag::getTagById($this->dbal, $_POST['idUnassignedTag']);
+    $unassignedTags = \Entity\Tag::getAllUnassignedTagsForEmployee($this->dbal, $_POST['idEmployee']);
+    $result = null;
+    if (!is_null($unassignedTags)) {
+        foreach($unassignedTags as $unassignedTag) {
+            if (!is_null($unassignedTag)) {
+                $result[] = array('tagName' => $unassignedTag->getName(), 'idTag' => $unassignedTag->getId(), 'tagPoints' => $unassignedTag->getPoints());
+            }
+        }
+    }
+
+    echo json_encode(array(
+        'result' => array(
+            'tagName' => $tag->getName(),
+            'idTag' => $tag->getId(),
+            'tagPoints' => $tag->getPoints(),
+            'tagType' => $tag->getType(),
+            'newPoints' => $newPoints,
+            'unassignedTags' => $result
+        )
+    ));
+
+});
+
+$app->post('/delete-employee-from-tag', function ($request, $response, $args) {
+    
+    \Entity\Tag::unsetEmployee($this->dbal, $_POST['idTag']);
+    \Entity\Employee::substractPointsFromEmployee($this->dbal, $_POST['idEmployee'], $_POST['points']);
+    $newPoints  = \Entity\Employee::getEmployeePoints($this->dbal, $_POST['idEmployee']);
+
+    $tag = \Entity\Tag::getTagById($this->dbal, $_POST['idTag']);
+    $unassignedTags = \Entity\Tag::getAllUnassignedTagsForEmployee($this->dbal, $_POST['idEmployee']);
+    $result = null;
+    if (!is_null($unassignedTags)) {
+        foreach($unassignedTags as $unassignedTag) {
+            if (!is_null($unassignedTag)) {
+                $result[] = array('tagName' => $unassignedTag->getName(), 'idTag' => $unassignedTag->getId(), 'tagPoints' => $unassignedTag->getPoints());
+            }
+        }
+    }
+
+    echo json_encode(array(
+        'result' => array(
+            'newPoints' => $newPoints,
+            'unassignedTags' => $result
         )
     ));
 

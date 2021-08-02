@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        {% include "header.html.twig" %}
+    </head>
+
+    <body>
+        {% include "navbar.html.twig" %}
+        {% include "Login.html.twig" %}
+        {% include "Signup.html.twig" %} 
+        {% include "createTag.html.twig" %} 
+
+        <div class="container">
+        <br>
+        <h2>Štítky</h2>
+        <a class="btn btn-dark pull-right" href="javascript:void(0);" data-toggle="modal" id="btn-createTag" data-target="#createTag">
+        <i class="fas fa-plus-circle"></i> Vytvořit štítek</a>
+        <br>
+        <br>
+
+        {% for tag in allTags %}
+            {% if not tag.getid == null %}
+
+                <div class="card text-center">
+                    <div class="card-header group-header">{{ tag.getName ~'      |      '~ tag.getPoints ~ ' bodů'}}</div>
+                    <div class="card-body main-text">
+                        <div class="left-panel">
+                            <div>Typ: {{  tag.getSource == 'generated' ? 'Vygenerováno automaticky' : 'Vytvořeno ručně' }}</div>
+                            <div>Druh: {{  tag.getType }}</div>
+                            <div>Jazyk: {{ tag.getLanguage }}</div>
+                        </div>
+                        <div class="right-panel">
+                            <div>Počet studentů: {{ tag.getStudentCount }}</div>
+                            <div>Počet hodin: {{ tag.getLessonCount }}</div>
+                            <div>Počet týdnů: {{ tag.getWeekCount }}</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-muted"></div>
+                </div>
+
+            {% endif %}
+            <br>
+        {% endfor %}
+            
+        </div>
+
+
+        {% include "Footer.html.twig" %}
+    </body>
+</html>
+

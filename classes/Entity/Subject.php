@@ -168,5 +168,16 @@ class Subject {
         return $this->data['lectureCount'];
     }
 
+    public function getExerciseCount() {
+        return $this->data['exerciseCount'];
+    }
 
+    public function getSeminarCount() {
+        return $this->data['seminarCount'];
+    }
+
+    public function getClassCount() {
+        return $this->data['classCount'];
+    }
+    
 }

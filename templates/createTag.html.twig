@@ -1,0 +1,51 @@
+<div id="createTag" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Vytvoření štítku</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+      <div class="alert alert-dark" id="createTag-alert" role="alert" style="display: none;">
+      </div>
+      <div class="form-group">
+          <label for="email">Název:</label>
+          <input type="email" class="form-control" id="tag-name-input">
+      </div>
+        <div class="form-group">
+          <label for="role">Skupina:</label>
+          <select class="form-control" id="tag-group-input">
+          <option selected>  -  </option>
+          {% for group in allGroups %}
+            {% if not group.getid == null %}
+              <option id="{{ group.getId }}">{{ group.getShortcut }}</option>
+            {% endif %}
+          {% endfor %}
+          </select>
+      </div>
+      <div class="form-group">
+          <label>Počet studentů:</label>
+          <input type="input" class="form-control" id="tag-studentCount-input">
+      </div>
+        <div class="form-group">
+          <label>Počet hodin:</label>
+          <input type="input" class="form-control" id="tag-lessonCount-input">
+      </div>
+         <div class="form-group">
+          <label>Počet týdnů:</label>
+          <input type="input" class="form-control" id="tag-weekCount-input">
+      </div>
+       <div class="form-group">
+          <label for="role">Typ:</label>
+          <select class="form-control" id="tag-type-input">
+            <option id="prednaska" selected>přednáška</option>
+            <option id="cviceni">cvičení</option>
+            <option id="seminar">seminář</option>
+          </select>
+      </div>
+      <button type="submit" id="btn-createTag" class="btn btn-dark pull-right">Vytvořit</button>
+      <button type="button" class="btn btn-dark pull-right" data-dismiss="modal">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>

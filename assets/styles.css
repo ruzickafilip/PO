@@ -2,12 +2,28 @@
 
 .alert {
     border: 1px;
-    margin-bottom: 0;
+    /* margin-bottom: 0; */
+    margin-bottom: 10px;
 }
 
 .group-header {
     font-size: 25px;
     text-align: left;
+}
+
+.main-text {
+    font-size: 20px;
+    text-align: left;
+}
+
+.left-panel {
+    width: 40%; 
+    float:left;
+}
+
+.right-panel {
+    width: 60%; 
+    float:right;
 }
 
 body {
